@@ -3,17 +3,17 @@ import matplotlib.pyplot as plt
 
 # constants
 # length of each dimension of the Taurus 
-N = 32
+N = 16
 # transition probability 
-p = 0.5
-iteration_count = 32**2
+p = np.sqrt(1/2)
+iteration_count = 400
 
 # stationary distribution 
 stat_dist = np.array([1/(N**2)]*(N**2))
 initial_dist = np.array([2/N**2]*int(N**2/2))
 initial_dist = np.append(initial_dist, np.zeros(int(N**2/2)))
 
-# spectral gap upper bound
+# spectral gap upper bound (only valid if p=0.5)
 upper_bounds = [np.sqrt(N)/2 * np.exp(-(np.pi**2) * n / (2 * N**2)) for n in range(iteration_count)]
 
 # helper functions:
@@ -47,14 +47,18 @@ def simulate_chain(dist, P, iterations):
     for i in range(iterations):
         dist = P.dot(dist)
         #print(dist)
-        y = np.append(y, compute_gap(dist, stat_dist))
+        y = np.append(y, d_TV(dist, stat_dist))
+    print(dist)
     return dist, y
 
-# check empirical average convergence rate 
-def compute_gap(curr, stat_dist):
-    return np.linalg.norm(curr - stat_dist)
+# check total variation distance
+def d_TV(curr, stat_dist):
+    return 0.5 * np.sum(np.abs(curr - stat_dist))
 
 final_dist, y = simulate_chain(initial_dist, transition_matrix, iteration_count)
-plt.plot(x, y)
-plt.plot(x, upper_bounds)
+
+plt.plot(x, y, c="r", label="Total variation distance")
+#plt.plot(x, upper_bounds, label="Upper bound")
+plt.legend()
+plt.savefig("graphs\in")
 plt.show()
