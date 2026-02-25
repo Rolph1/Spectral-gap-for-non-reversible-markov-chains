@@ -3,15 +3,16 @@ import matplotlib.pyplot as plt
 
 # constants
 # length of each dimension of the Taurus 
-N = 64
+N = 200
 # transition probability 
 p = np.sqrt(1/2)
 iteration_count = 100
 
 # stationary distribution 
 stat_dist = np.array([1/(N**2)]*(N**2))
-initial_dist = np.array([2/N**2]*int(N**2/2))
-initial_dist = np.append(initial_dist, np.zeros(int(N**2/2)))
+initial_dist = np.array([4/N**2]*int(N**2/4))
+initial_dist = np.append(initial_dist, np.zeros(int(3 * N**2/4)))
+
 #random_array = np.random.rand(N**2)
 # normalize so it's a distribution
 #initial_dist = random_array / np.linalg.norm(random_array)
@@ -69,7 +70,6 @@ final_dist, y, dist_emp_avg = simulate_chain(initial_dist, transition_matrix, it
 empirical_variance = np.array([])
 
 for distribution in dist_emp_avg:
-    #print(np.var(distribution))
     empirical_variance = np.append(empirical_variance, np.var(distribution))
 
 #plt.plot(x, y, c="r", label="Total variation distance")
