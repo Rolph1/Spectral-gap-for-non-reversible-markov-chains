@@ -52,8 +52,8 @@ def compute_delta_paper(N, p, m_1, m_2, number_deltas, iteration_count):
         for i in range(iteration_count):
             # take a step, then compute f
             curr_x, curr_y = take_step(curr_x, curr_y, p, N)
-            val_sin += np.sin(2*np.pi*(m_1*curr_x + m_2*curr_y)/N)
-            val_cos += np.cos(2*np.pi*(m_1*curr_x + m_2*curr_y)/N)
+            val_sin += np.sin(2*np.pi * (m_1*curr_x + m_2*curr_y)/N)
+            val_cos += np.cos(2*np.pi * (m_1*curr_x + m_2*curr_y)/N)
             # compute empirical average of f after drawing i samples
             f_sum = val_sin**2 + val_cos**2 
             all_deltas[j, i] = f_sum/(i+1)**2
@@ -117,3 +117,8 @@ def compute_tau(N, p):
     generator_matrix = csr_identity - (csr_right + csr_up)
 
     return 1/generator_sv(generator_matrix)
+
+def compute_tau_cyclical(N, m_1, m_2, p):
+    gamma_squared = (1 - p * np.cos(2 * np.pi * m_1 / N) - (1-p) * np.cos(2 * np.pi * m_2 / N)) ** 2 + (p * np.sin(2*np.pi * m_1 / N) + (1-p) * np.sin(2*np.pi * m_2/N)) ** 2
+    gamma = np.sqrt(gamma_squared)
+    return 1/gamma
