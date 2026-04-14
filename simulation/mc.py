@@ -22,7 +22,16 @@ def compute_observed_tau(delta):
     return big_tau
 
 # try all combinations lol
-def find_opt_int(N, p):
+def find_opt_int(N, p, rational=False):
+    if rational: # assuming N is big enough
+        inv_p = 1-p
+        p_ = p 
+        decimal_count = 0 # to help with rounding later, inv_p has weird digits because of float point representation bugs
+        while p != np.floor(p):
+            decimal_count += 1
+            p *= 10
+        return N - np.round(inv_p, decimal_count) * 10**decimal_count, p_ * 10**decimal_count # to roud off errors
+
     L = int(np.floor(N**(1/3)))
     minimum = 10000
     min_m1, min_m2 = -1000, -1000
