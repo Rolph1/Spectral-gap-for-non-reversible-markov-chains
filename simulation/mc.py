@@ -3,13 +3,19 @@ import numpy as np
 from scipy.sparse import csr_matrix
 from scipy.sparse.linalg import svds
 
+
+# returns new x, new y, 1 if started a new line (ie did a full rotation), 0 otherwise
 def take_step(x, y, p, N):
     generated_prob = np.random.random()
+    moduloed = 0
+
+    if x+1 == N or y+1 == N:
+        moduloed = 1
 
     if generated_prob > p:
-        return x , (y+1)%N # prob. 1-p 
+        return x, (y+1)%N, moduloed # prob. 1-p 
     else:
-        return (x+1)%N, y # prob p
+        return (x+1)%N, y, moduloed # prob p
     
 def compute_observed_tau(delta):
     big_tau = -10
@@ -49,6 +55,7 @@ def find_opt_int(N, p, rational=False):
 def compute_delta_paper(N, p, m_1, m_2, number_deltas, iteration_count):
     print(p)
     all_deltas = np.zeros((number_deltas, iteration_count))
+    taurus_lines = np.zeros((number_deltas, iteration_count))
 
     for j in range(number_deltas):
         # we want X_0 to be sampled from the stationary distribution, so we randomly draw initial x and y
@@ -58,17 +65,24 @@ def compute_delta_paper(N, p, m_1, m_2, number_deltas, iteration_count):
         val_sin = 0
         val_cos = 0
 
+        line_count = 0 # keeps track of how many times we apply modulo on x or y coordinates
+
         for i in range(iteration_count):
             # take a step, then compute f
-            curr_x, curr_y = take_step(curr_x, curr_y, p, N)
+            curr_x, curr_y, line = take_step(curr_x, curr_y, p, N)
+            line_count += line
+
             val_sin += np.sin(2*np.pi * (m_1*curr_x + m_2*curr_y)/N)
             val_cos += np.cos(2*np.pi * (m_1*curr_x + m_2*curr_y)/N)
+
             # compute empirical average of f after drawing i samples
             f_sum = val_sin**2 + val_cos**2 
             all_deltas[j, i] = f_sum/(i+1)**2
+            taurus_lines[j, i] = line_count
 
     delta_n = np.sqrt(np.mean(all_deltas, axis=0))
-    return delta_n
+    taurus_lines_n = np.mean(taurus_lines, axis=0)
+    return delta_n, taurus_lines_n
 
 ### helper methods
 # to go from and back to matrix indices based on a loop that goes through each element of the nodes once
