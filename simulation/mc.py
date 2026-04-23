@@ -74,8 +74,39 @@ def compute_delta_paper(N, p, m_1, m_2, number_deltas, iteration_count):
             all_deltas[j, i] = f_sum/(i+1)**2
 
     delta_n = np.sqrt(np.mean(all_deltas, axis=0))
-    
+
     return delta_n
+
+# simulates a walk of iteration_count steps on a 2D taurus of size NxN
+# and probability of moving right = p
+# returns the matrix described below
+def compute_path(N, p, number_runs, iteration_count):
+    runs = np.zeros((number_runs, N**2)) # matrix that contains all runs, m_ji contains jth run's i index pass count
+
+    for run in range(number_runs):
+        curr_x = np.random.randint(0, N)
+        curr_y = np.random.randint(0, N)
+
+        for step in range(iteration_count):
+            curr_x, curr_y = take_step(curr_x, curr_y, p, N)
+            encoded_index = encode_index(curr_x, curr_y, N)
+
+            runs[run, encoded_index] += 1
+
+    return runs
+
+def compute_single_path(N, p, iteration_count):
+    index_passes = np.zeros((N**2, N**2)) # matrix that contains all runs, m_ji contains jth run's i index pass count
+
+    curr_x = np.random.randint(0, N)
+    curr_y = np.random.randint(0, N)
+
+    for step in range(iteration_count):
+        curr_x, curr_y = take_step(curr_x, curr_y, p, N)
+
+        index_passes[curr_x, curr_y] += 1
+
+    return index_passes
 
 ### helper methods
 # to go from and back to matrix indices based on a loop that goes through each element of the nodes once
