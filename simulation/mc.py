@@ -84,8 +84,8 @@ def compute_path(N, p, number_runs, iteration_count):
     runs = np.zeros((number_runs, N**2)) # matrix that contains all runs, m_ji contains jth run's i index pass count
 
     for run in range(number_runs):
-        curr_x = np.random.randint(0, N)
-        curr_y = np.random.randint(0, N)
+        curr_x = int(np.round(N/2))
+        curr_y = int(np.round(N/2))
 
         for step in range(iteration_count):
             curr_x, curr_y = take_step(curr_x, curr_y, p, N)
