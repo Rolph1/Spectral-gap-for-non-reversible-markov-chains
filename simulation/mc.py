@@ -48,15 +48,22 @@ def find_opt_int(N, p, rational=False):
                 min_m2 = m_2
     return min_m1, min_m2
 
-def compute_delta_paper(N, p, m_1, m_2, number_deltas, iteration_count):
+#TODO: return delta squared so that computationsa are quicker
+def compute_delta_paper(N, p, m_1, m_2, number_deltas, iteration_count, dist="stationary", xy_0=None, squared=False):
     print(p)
     all_deltas = np.zeros((number_deltas, iteration_count))
 
     for j in range(number_deltas):
         # we want X_0 to be sampled from the stationary distribution, so we randomly draw initial x and y
         # this is how to simulate the stationary distribution!!!
-        curr_x = np.random.randint(0, N)
-        curr_y = np.random.randint(0, N)
+        if dist == "stationary":
+            curr_x = np.random.randint(0, N)
+            curr_y = np.random.randint(0, N)
+        elif dist == "delta":
+            curr_x = xy_0[0]
+            curr_y = xy_0[1]
+        else:
+            raise Exception("Invalid starting distribution.")
         val_sin = 0
         val_cos = 0
 
@@ -73,7 +80,10 @@ def compute_delta_paper(N, p, m_1, m_2, number_deltas, iteration_count):
             f_sum = val_sin**2 + val_cos**2 
             all_deltas[j, i] = f_sum/(i+1)**2
 
-    delta_n = np.sqrt(np.mean(all_deltas, axis=0))
+    if not squared:
+        delta_n = np.sqrt(np.mean(all_deltas, axis=0))
+    else:
+        delta_n = np.mean(all_deltas, axis=0)
 
     return delta_n
 
@@ -165,7 +175,16 @@ def compute_tau(N, p):
 
     return 1/generator_sv(generator_matrix)
 
+#  optimized formula to compute tau for the 2D taurus case
 def compute_tau_cyclical(N, m_1, m_2, p):
     gamma_squared = (1 - p * np.cos(2 * np.pi * m_1 / N) - (1-p) * np.cos(2 * np.pi * m_2 / N)) ** 2 + (p * np.sin(2*np.pi * m_1 / N) + (1-p) * np.sin(2*np.pi * m_2/N)) ** 2
     gamma = np.sqrt(gamma_squared)
     return 1/gamma
+
+def compute_mu_min_bound(tau, n, mu_min, mu_x_0):
+    return 4 * tau/n + 4 * tau/(n**2) * 1/(np.sqrt(mu_min)*np.sqrt(mu_x_0)) * 1/(1 - np.exp(-1/(4 * tau**2)))
+
+# in the 2D taurus the stationary distribution is uniform so there is no use in computing mu_x_0 and mu_min separately
+# and wasting computations for the square roots
+def compute_mu_min_bound_taurus(tau, n, mu_min):
+    return 4 * tau/n + 4 * tau/(n**2) * 1/mu_min * 1/(1 - np.exp(-1/(4 * tau**2)))
